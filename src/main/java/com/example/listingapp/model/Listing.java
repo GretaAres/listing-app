@@ -19,7 +19,7 @@ public class Listing {
     private int id;
     private String title;
     private String description;
-    private Double price;
+    private double price;
     @ManyToOne
     private Category category;
     @ManyToOne

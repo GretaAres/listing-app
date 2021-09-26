@@ -1,11 +1,15 @@
 package com.example.listingapp.endpoint;
 
+import com.example.listingapp.dto.UserDto;
+import com.example.listingapp.dto.UserSaveDto;
 import com.example.listingapp.model.User;
 import com.example.listingapp.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,28 +17,35 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserEndpoint {
     private final UserService userService;
+    private final ModelMapper mapper;
 
     @GetMapping("/users")
-    public List<User> users(){
-        return  userService.findAllUsers();
+    public List<UserDto> users(){
+        List<User> all=userService.findAllUsers();
+        List<UserDto> userDtos= new ArrayList<>();
+        for(User user:all){
+            UserDto userDto=mapper.map(user,UserDto.class);
+            userDtos.add(userDto);
+        }
+        return  userDtos;
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<User> getUser(@PathVariable("id") int id){
+    public ResponseEntity<UserDto> getUser(@PathVariable("id") int id){
         Optional<User> byId=userService.findById(id);
         if (!byId.isPresent()){
             return ResponseEntity
                     .notFound()
                     .build();
         }
-        return  ResponseEntity.ok(byId.get());
+        return  ResponseEntity.ok(mapper.map(byId.get(),UserDto.class));
     }
     @PostMapping("/users")
-    public User user(@RequestBody User user){
-        return userService.save(user);
+    public UserDto user(@RequestBody UserSaveDto user){
+        return  mapper.map(userService.save(mapper.map(user,User.class)),UserDto.class);
     }
     @PutMapping("/users/{id}")
-    public ResponseEntity<User> user(@PathVariable("id") int id,@RequestBody User user){
+    public ResponseEntity<UserDto> user(@PathVariable("id") int id,@RequestBody UserSaveDto user){
         Optional<User> byId=userService.findById(id);
         if (!byId.isPresent()){
             return ResponseEntity
@@ -45,10 +56,12 @@ public class UserEndpoint {
         userFromDb.setName(user.getName());
         userFromDb.setSurname(user.getSurname());
         userFromDb.setRole(user.getRole());
-        return ResponseEntity.ok().body(userService.save(userFromDb));
+        return ResponseEntity
+                .ok()
+                .body(mapper.map(userService.save(userFromDb),UserDto.class));
     }
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<User> deleteById(@PathVariable("id") int id){
+    public ResponseEntity deleteById(@PathVariable("id") int id){
         Optional<User> byId=userService.findById(id);
         if (!byId.isPresent()){
             return ResponseEntity

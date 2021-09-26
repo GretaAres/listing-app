@@ -1,8 +1,6 @@
 package com.example.listingapp.endpoint;
 
-import com.example.listingapp.model.Category;
 import com.example.listingapp.model.Listing;
-import com.example.listingapp.model.User;
 import com.example.listingapp.service.ListingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,43 +14,29 @@ import java.util.Optional;
 public class ListingEndpoint {
 
     private final ListingService listingService;
+
     @GetMapping("/listings")
     public List<Listing> listings(){
         return  listingService.findAll();
     }
 
     @GetMapping("/listings/{id}")
-    public ResponseEntity<Listing> getListing(@PathVariable("id") int id){
-        Optional<Listing> byId=listingService.findById(id);
-        if (!byId.isPresent()){
-            return ResponseEntity
-                    .notFound()
-                    .build();
-        }
-        return  ResponseEntity.ok(byId.get());
+    public Listing  getListing(@PathVariable("id") int id){
+
+        return  listingService.getListingById(id);
     }
 
     @GetMapping("/listings/byUser/{email}")
-    public ResponseEntity<Listing> getListingByUser(@PathVariable("email") User user){
-        Optional<Listing> byEmail=listingService.findByUser(user);
-        if (!byEmail.isPresent()){
-            return ResponseEntity
-                    .notFound()
-                    .build();
-        }
-        return  ResponseEntity.ok(byEmail.get());
+    public Listing getByEmail(@PathVariable("email") String email){
+
+        return listingService.getByUserEmail(email);
     }
 
 
-    @GetMapping("/listings/bycategory/{categoryId}")
-    public ResponseEntity<Listing> getListingByCategory(@PathVariable("categoryId")Category category){
-        Optional<Listing> byCategoryId=listingService.findByCategoryId(category);
-        if (!byCategoryId.isPresent()){
-            return ResponseEntity
-                    .notFound()
-                    .build();
-        }
-        return  ResponseEntity.ok(byCategoryId.get());
+    @GetMapping("/listings/byCategory/{categoryId}")
+    public Optional<Listing> getByCategoryId(@PathVariable("categoryId")int id){
+
+        return  listingService.getByCategoryId(id);
     }
 
     @PostMapping("/listings")
